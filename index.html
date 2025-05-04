@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Resell - Premium Resale Products</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .nav-link:hover::after {
+            content: '';
+            display: block;
+            width: 100%;
+            height: 2px;
+            background: #3b82f6;
+            margin-top: 2px;
+        }
+        .hero-overlay {
+            background: rgba(0, 0, 0, 0.5);
+        }
+        .category-btn:hover {
+            background: #3b82f6;
+            color: white;
+        }
+        .newsletter-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+        .sale-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ef4444;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .cart-overlay {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100%;
+            background: white;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        .cart-overlay.active {
+            right: 0;
+        }
+        .cart-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .cart-backdrop.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        @media (max-width: 640px) {
+            .cart-overlay {
+                width: 100%;
+                right: -100%;
+            }
+        }
+    </style>
+</head>
+<body class="font-sans bg-gray-50">
+    <!-- Header/Navbar -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-crown text-blue-500 text-2xl"></i>
+                <a href="#" class="text-xl font-bold text-gray-800">Elite Resell</a>
+            </div>
+            
+            <nav class="hidden md:flex space-x-8">
+                <a href="#" class="nav-link text-gray-700 hover:text-blue-500 font-medium">Home</a>
+                <a href="#products" class="nav-link text-gray-700 hover:text-blue-500 font-medium">Products</a>
+                <a href="#categories" class="nav-link text-gray-700 hover:text-blue-500 font-medium">Categories</a>
+                <a href="#about" class="nav-link text-gray-700 hover:text-blue-500 font-medium">About</a>
+                <a href="#contact" class="nav-link text-gray-700 hover:text-blue-500 font-medium">Contact</a>
+            </nav>
+            
+            <div class="flex items-center space-x-4">
+                <a href="#" class="text-gray-700 hover:text-blue-500">
+                    <i class="fas fa-search text-lg"></i>
+                </a>
+                <a href="#" class="text-gray-700 hover:text-blue-500 relative" id="cart-icon">
+                    <i class="fas fa-shopping-cart text-lg"></i>
+                    <span class="absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center" id="cart-count">0</span>
+                </a>
+                <a href="#" class="text-gray-700 hover:text-blue-500">
+                    <i class="fas fa-user text-lg"></i>
+                </a>
+                <button class="md:hidden text-gray-700">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Cart Overlay -->
+    <div class="cart-backdrop" id="cart-backdrop"></div>
+    <div class="cart-overlay" id="cart-overlay">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Your Cart</h2>
+                <button class="text-gray-500 hover:text-gray-700" id="close-cart">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="border-b border-gray-200 mb-4"></div>
+            <div id="cart-items">
+                <!-- Cart items will be added here dynamically -->
+                <p class="text-gray-500 text-center py-8">Your cart is empty</p>
+            </div>
+            <div class="border-t border-gray-200 mt-4 pt-4">
+                <div class="flex justify-between mb-2">
+                    <span class="font-medium">Subtotal:</span>
+                    <span class="font-medium" id="cart-subtotal">$0.00</span>
+                </div>
+                <div class="flex justify-between mb-4">
+                    <span>Shipping:</span>
+                    <span id="cart-shipping">$5.00</span>
+                </div>
+                <div class="flex justify-between text-lg font-bold">
+                    <span>Total:</span>
+                    <span id="cart-total">$5.00</span>
+                </div>
+                <button class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg mt-6 font-medium" id="checkout-btn">
+                    Proceed to Checkout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="relative h-96 flex items-center justify-center bg-gray-900 overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1925&q=80" 
+             alt="Hero background" class="absolute w-full h-full object-cover opacity-70">
+        
+        <div class="hero-overlay absolute inset-0"></div>
+        
+        <div class="relative z-10 text-center px-4">
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Premium Resale Products</h1>
+            <p class="text-xl text-gray-200 mb-8 max-w-2xl mx-auto">Authentic AirPods, Luxury Colognes & Exclusive Nike Sneakers at unbeatable prices</p>
+            <a href="#products" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-8 rounded-full transition duration-300 inline-block">
+                Shop Now
+            </a>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section id="categories" class="py-16 gradient-bg">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Shop By Category</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- AirPods Category -->
+                <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition duration-300">
+                    <div class="relative h-48 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1591378603223-e15b45a81640?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                             alt="AirPods" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                            <h3 class="text-white text-2xl font-bold">AirPods</h3>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-gray-600 mb-4">Premium quality AirPods at resale prices. All models available.</p>
+                        <a href="#airpods-section" class="text-blue-500 font-medium inline-flex items-center">
+                            View Collection <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Colognes Category -->
+                <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition duration-300">
+                    <div class="relative h-48 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                             alt="Colognes" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                            <h3 class="text-white text-2xl font-bold">Colognes</h3>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-gray-600 mb-4">Luxury fragrances from top brands at discounted prices.</p>
+                        <a href="#colognes-section" class="text-blue-500 font-medium inline-flex items-center">
+                            View Collection <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Nike Shoes Category -->
+                <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition duration-300">
+                    <div class="relative h-48 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1600269452121-4f2416e55c28?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1465&q=80" 
+                             alt="Nike Shoes" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                            <h3 class="text-white text-2xl font-bold">Nike Shoes</h3>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-gray-600 mb-4">Exclusive Nike sneakers, rare editions and classic models.</p>
+                        <a href="#nike-section" class="text-blue-500 font-medium inline-flex items-center">
+                            View Collection <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AirPods Products -->
+    <section id="airpods-section" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center mb-12">
+                <h2 class="text-3xl font-bold">AirPods Collection</h2>
+                <div class="flex space-x-2">
+                    <button class="category-btn bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-medium">All</button>
+                    <button class="category-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-500 hover:text-white">Pro</button>
+                    <button class="category-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-500 hover:text-white">Max</button>
+                    <button class="category-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-500 hover:text-white">Standard</button>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- AirPods Pro 2 -->
+                <div class="product-card bg-white rounded-lg overflow-hidden shadow-md transition duration-300 relative" data-id="1" data-name="AirPods Pro (2nd Gen)" data-price="199.00" data-image="https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/MME73?wid=2000&hei=2000&fmt=jpeg&qlt=95&.v=1632861342000">
+                    <div class="sale-badge">15% OFF</div>
+                    <div class="h-48 bg-gray-100 flex items-center justify-center p-4">
+                        <img src="https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/MME73?wid=2000&hei=2000&fmt=jpeg&qlt=95&.v=1632861342000" 
+                             alt="AirPods Pro" class="h-full object-contain">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-lg mb-1">AirPods Pro (2nd Gen)</h3>
+                        <p class="text-gray-500 text-sm mb-2">Like New Condition</p>
+                        <div class="flex items-center mb-2">
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="text-gray-500 text-xs ml-1">(42 reviews)</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-gray-400 line-through text-sm">$249.00</span>
+                                <span class="text-blue-500 font-bold ml-2">$199.00</span>
+                            </div>
+                            <button class="add-to-cart bg-blue-500 hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- AirPods Max -->
+                <div class="product-card bg-white rounded-lg overflow-hidden shadow-md transition duration-300 relative" data-id="2" data-name="AirPods Max - Silver" data-price="449.00" data-image="https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/airpods-max-hero-select-202011_FMT_WHH?wid=2000&hei=2000&fmt=jpeg&qlt=95&.v=1633623988000">
+                    <div class="h-48 bg-gray-100 flex items-center justify-center p-4">
+                        <img src="https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/airpods-max-hero-select-202011_FMT_WHH?wid=2000&hei=2000&fmt=jpeg&qlt=95&.v=1633623988000" 
+                             alt="AirPods Max" class="h-full object-contain">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-lg mb-1">AirPods Max - Silver</h3>
+                        <p class="text-gray-500 text-sm mb-2">Mint Condition</p>
+                        <div class="flex items-center mb-2">
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="text-gray-500 text-xs ml-1">(36 reviews)</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-gray-400 line-through text-sm">$549.00</span>
+                                <span class="text-blue-500 font-bold ml-2">$449.00</span>
+                            </div>
+                            <button class="add-to-cart bg-blue-500 hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- AirPods 3 -->
+                <div class="product-card bg-white rounded-lg overflow-hidden shadow-md transition duration-300 relative" data-id="3" data-name="AirPods (3rd Generation)" data-price="149.00" data-image="https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/MME73?wid=2000&hei=2000&fmt=jpeg&qlt=95&.v=1632861342000">
+                    <div class="sale-badge">NEW</div>
+                    <div class="h-48 bg-gray-100 flex items-center justify-center p-4">
+                        <img src="https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/MME73?wid=2000&hei=2000&fmt=jpeg&qlt=95&.v=1632861342000" 
+                             alt="AirPods 3" class="h-full object-contain">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-lg mb-1">AirPods (3rd Gen)</h3>
+                        <p class="text-gray-500 text-sm mb-2">Brand New Sealed</p>
+                        <div class="flex items-center mb-2">
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                            <span class="text-gray-500 text-xs ml-1">(28 reviews)</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-gray-400 line-through text-sm">$179.00</span>
+                                <span class="text-blue-500 font-bold ml-2">$149.00</span>
+                            </div>
+                            <button class="add-to-cart bg-blue-500 hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- AirPods Pro 1 -->
+                <div class="product-card bg-white rounded-lg overflow-hidden shadow-md transition duration-300 relative" data-id="4" data-name="AirPods Pro (1st Gen)" data-price="129.00" data-image="https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/MME73?wid=2000&hei=2000&fmt=jpeg&qlt=95&.v=1632861342000">
+                    <div class="sale-badge">25% OFF</div>
+                    <div class="h-48 bg-gray-100 flex items-center justify-center p-4">
+                        <img src="https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/MME73?wid=2000&hei=2000&fmt=jpeg&qlt=95&.v=1632861342000" 
+                             alt="AirPods Pro 1" class="h-full object-contain">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-lg mb-1">AirPods Pro (1st Gen)</h3>
+                        <p class="text-gray-500 text-sm mb-2">Good Condition</p>
+                        <div class="flex items-center mb-2">
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                            <span class="text-gray-500 text-xs ml-1">(19 reviews)</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-gray-400 line-through text-sm">$179.00</span>
+                                <span class="text-blue-500 font-bold ml-2">$129.00</span>
+                            </div>
+                            <button class="add-to-cart bg-blue-500 hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Colognes Products -->
+    <section id="colognes-section" class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold mb-12">Luxury Colognes</h2>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Creed Aventus -->
+                <div class="product-card bg-white rounded-lg overflow-hidden shadow-md transition duration-300" data-id="5" data-name="Creed Aventus" data-price="299.00" data-image="https://www.creedboutique.com/media/catalog/product/cache/6a5db0c0e5c0f3a72c70a9c72c6c4a00/a/v/aventus_100ml_1_1.png">
+                    <div class="h-48 bg-gray-100 flex items-center justify-center p-4">
+                        <img src="https://www.creedboutique.com/media/catalog/product/cache/6a5db0c0e5c0f3a72c70a9c72c6c4a00/a/v/aventus_100ml_1_1.png" 
+                             alt="Creed Aventus" class="h-full object-contain">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-lg mb-1">Creed Aventus</h3>
+                        <p class="text-gray-500 text-sm mb-2">100ml - 95% Full</p>
+                        <div class="flex items-center mb-2">
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="text-gray-500 text-xs ml-1">(28 reviews)</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-blue-500 font-bold">$299.00</span>
+                            </div>
+                            <button class="add-to-cart bg-blue-500 hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tom Ford Tobacco Vanille -->
+                <div class="product-card bg-white rounded-lg overflow-hidden shadow-md transition duration-300" data-id="6" data-name="Tom Ford Tobacco Vanille" data-price="249.00" data-image="https://www.tomford.com/media/catalog/product/cache/6a5db0c0e5c0f3a72c70a9c72c6c4a00/t/o/tobacco-vanille-50ml-1_1.png">
+                    <div class="h-48 bg-gray-100 flex items-center justify-center p-4">
+                        <img src="https://www.tomford.com/media/catalog/product/cache/6a5db0c0e5c0f3a72c70a9c72c6c4a00/t/o/tobacco-vanille-50ml-1_1.png" 
+                             alt="Tom Ford Tobacco Vanille" class="h-full object-contain">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-lg mb-1">Tom Ford Tobacco Vanille</h3>
+                        <p class="text-gray-500 text-sm mb-2">50ml - 90% Full</p>
+                        <div class="flex items-center mb-2">
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="text-gray-500 text-xs ml-1">(22 reviews)</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-blue-500 font-bold">$249.00</span>
+                            </div>
+                            <button class="add-to-cart bg-blue-500 hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Dior Sauvage -->
+                <div class="product-card bg-white rounded-lg overflow-hidden shadow-md transition duration-300" data-id="7" data-name="Dior Sauvage" data-price="99.00" data-image="https://www.dior.com/couture/var/dior/storage/images/beauty/fragrance/men/sauvage/sauvage-eau-de-parfum/1280x1280/16289068-1-eng-US/1280x1280_16289068-1-eng-US.jpg">
+                    <div class="h-48 bg-gray-100 flex items-center justify-center p-4">
+                        <img src="https://www.dior.com/couture/var/dior/storage/images/beauty/fragrance/men/sauvage/sauvage-eau-de-parfum/1280x1280/16289068-1-eng-US/1280x1280_16289068-1-eng-US.jpg" 
+                             alt="Dior Sauvage" class="h-full object-contain">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-lg mb-1">Dior Sauvage</h3>
+                        <p class="text-gray-500 text-sm mb-2">100ml - 80% Full</p>
+                        <div class="flex items-center mb-2">
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="text-gray-500 text-xs ml-1">(35 reviews)</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-blue-500 font-bold">$99.00</span>
+                            </div>
+                            <button class="add-to-cart bg-blue-500 hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chanel Bleu -->
+                <div class="product-card bg-white rounded-lg overflow-hidden shadow-md transition duration-300" data-id="8" data-name="Chanel Bleu de Chanel" data-price="159.00" data-image="https://www.chanel.com/images//t_one//w_0.51,h_0.51,c_crop/q_auto:good,f_jpg,fl_lossy,dpr_1.2/w_1240/bleu-de-chanel-eau-de-parfum-spray-3-4fl-oz--packshot-default-107360-8848387276830.jpg">
+                    <div class="h-48 bg-gray-100 flex items-center justify-center p-4">
+                        <img src="https://www.chanel.com/images//t_one//w_0.51,h_0.51,c_crop/q_auto:good,f_jpg,fl_lossy,dpr_1.2/w_1240/bleu-de-chanel-eau-de-parfum-spray-3-4fl-oz--packshot-default-107360-8848387276830.jpg" 
+                             alt="Chanel Bleu" class="h-full object-contain">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-lg mb-1">Chanel Bleu de Chanel</h3>
+                        <p class="text-gray-500 text-sm mb-2">100ml - 85% Full</p>
+                        <div class="flex items-center mb-2">
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                            <span class="text-gray-500 text-xs ml-1">(18 reviews)</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-blue-500 font-bold">$159.00</span>
+                            </div>
+                            <button class="add-to-cart bg-blue-500 hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Nike Products -->
+    <section id="nike-section" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold mb-12">Nike Sneakers</h2>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Nike Dunk Low -->
+                <div class="product-card bg-white rounded-lg overflow-hidden shadow-md transition duration-300 relative" data-id="9" data-name="Nike Dunk Low Retro" data-price="110.00" data-image="https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/skwgyqrbfzsl6uyeh0gg/dunk-low-shoes-1PhQRw.png">
+                    <div class="sale-badge">NEW</div>
+                    <div class="h-48 bg-gray-100 flex items-center justify-center p-4">
+                        <img src="https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/skwgyqrbfzsl6uyeh0gg/dunk-low-shoes-1PhQRw.png" 
+                             alt="Nike Dunk Low" class="h-full object-contain">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-lg mb-1">Nike Dunk Low Retro</h3>
+                        <p class="text-gray-500 text-sm mb-2">Black/White - Size 10</p>
+                        <div class="flex items-center mb-2">
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                            <span class="text-gray-500 text-xs ml-1">(15 reviews)</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-gray-400 line-through text-sm">$130.00</span>
+                                <span class="text-blue-500 font-bold ml-2">$110.00</span>
+                            </div>
+                            <button class="add-to-cart bg-blue-500 hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Air Jordan 1 -->
+                <div class="product-card bg-white rounded-lg overflow-hidden shadow-md transition duration-300 relative" data-id="10" data-name="Air Jordan 1 Retro High" data-price="179.00" data-image="https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/7b7d8b4e-4c0f-4a5a-8b5a-5d8b4e4c0f5a/air-jordan-1-retro-high-og-shoes-1PhQRw.png">
+                    <div class="h-48 bg-gray-100 flex items-center justify-center p-4">
+                        <img src="https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/7b7d8b4e-4c0f-4a5a-8b5a-5d8b4e4c0f5a/air-jordan-1-retro-high-og-shoes-1PhQRw.png" 
+                             alt="Air Jordan 1" class="h-full object-contain">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-lg mb-1">Air Jordan 1 Retro High</h3>
+                        <p class="text-gray-500 text-sm mb-2">Bred - Size 9.5</p>
+                        <div class="flex items-center mb-2">
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="text-gray-500 text-xs ml-1">(31 reviews)</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-blue-500 font-bold">$179.00</span>
+                            </div>
+                            <button class="add-to-cart bg-blue-500 hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Nike Air Force 1 -->
+                <div class="product-card bg-white rounded-lg overflow-hidden shadow-md transition duration-300 relative" data-id="11" data-name="Nike Air Force 1 '07" data-price="89.00" data-image="https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/8b7d8b4e-4c0f-4a5a-8b5a-5d8b4e4c0f5a/air-force-1-07-shoes-1PhQRw.png">
+                    <div class="sale-badge">20% OFF</div>
+                    <div class="h-48 bg-gray-100 flex items-center justify-center p-4">
+                        <img src="https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/8b7d8b4e-4c0f-4a5a-8b5a-5d8b4e4c0f5a/air-force-1-07-shoes-1PhQRw.png" 
+                             alt="Nike Air Force 1" class="h-full object-contain">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-lg mb-1">Nike Air Force 1 '07</h3>
+                        <p class="text-gray-500 text-sm mb-2">White - Size 11</p>
+                        <div class="flex items-center mb-2">
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="text-gray-500 text-xs ml-1">(27 reviews)</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-gray-400 line-through text-sm">$110.00</span>
+                                <span class="text-blue-500 font-bold ml-2">$89.00</span>
+                            </div>
+                            <button class="add-to-cart bg-blue-500 hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Nike Air Max 90 -->
+                <div class="product-card bg-white rounded-lg overflow-hidden shadow-md transition duration-300 relative" data-id="12" data-name="Nike Air Max 90" data-price="119.00" data-image="https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/8b7d8b4e-4c0f-4a5a-8b5a-5d8b4e4c0f5a/air-max-90-shoes-1PhQRw.png">
+                    <div class="h-48 bg-gray-100 flex items-center justify-center p-4">
+                        <img src="https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/8b7d8b4e-4c0f-4a5a-8b5a-5d8b4e4c0f5a/air-max-90-shoes-1PhQRw.png" 
+                             alt="Nike Air Max 90" class="h-full object-contain">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-lg mb-1">Nike Air Max 90</h3>
+                        <p class="text-gray-500 text-sm mb-2">Infrared - Size 10.5</p>
+                        <div class="flex items-center mb-2">
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                            <span class="text-gray-500 text-xs ml-1">(14 reviews)</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-blue-500 font-bold">$119.00</span>
+                            </div>
+                            <button class="add-to-cart bg-blue-500 hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us -->
+    <section id="about" class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Why Choose Elite Resell</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-sm text-center">
+                    <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-check-circle text-blue-500 text-2xl"></i>
+                    </div>
+                    <h3 class="font-semibold text-lg mb-2">Authenticity Guaranteed</h3>
+                    <p class="text-gray-600">Every product is thoroughly verified by our experts to ensure 100% authenticity.</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-sm text-center">
+                    <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-tag text-blue-500 text-2xl"></i>
+                    </div>
+                    <h3 class="font-semibold text-lg mb-2">Best Prices</h3>
+                    <p class="text-gray-600">We offer premium products at prices significantly lower than retail.</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-sm text-center">
+                    <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-shield-alt text-blue-500 text-2xl"></i>
+                    </div>
+                    <h3 class="font-semibold text-lg mb-2">Secure Shopping</h3>
+                    <p class="text-gray-600">Your transactions are protected with industry-leading security measures.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">What Our Customers Say</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="flex text-yellow-400 mr-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <span class="text-sm text-gray-500">2 days ago</span>
+                    </div>
+                    <p class="text-gray-700 mb-4">"Got my AirPods Pro 2 at an amazing price and they're in perfect condition. The verification process gave me peace of mind!"</p>
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-full bg-gray-300 mr-3 overflow-hidden">
+                            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Sarah J." class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h4 class="font-medium">Sarah J.</h4>
+                            <p class="text-sm text-gray-500">Verified Buyer</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="flex text-yellow-400 mr-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <span class="text-sm text-gray-500">1 week ago</span>
+                    </div>
+                    <p class="text-gray-700 mb-4">"I was skeptical about buying cologne online, but my Creed Aventus arrived exactly as described. Will definitely shop here again."</p>
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-full bg-gray-300 mr-3 overflow-hidden">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Michael T." class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h4 class="font-medium">Michael T.</h4>
+                            <p class="text-sm text-gray-500">Verified Buyer</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="flex text-yellow-400 mr-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span class="text-sm text-gray-500">3 weeks ago</span>
+                    </div>
+                    <p class="text-gray-700 mb-4">"Found the exact Nike Dunks I wanted for months at a price I could actually afford. Shipping was super fast too!"</p>
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-full bg-gray-300 mr-3 overflow-hidden">
+                            <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Jessica L." class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h4 class="font-medium">Jessica L.</h4>
+                            <p class="text-sm text-gray-500">Verified Buyer</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter -->
+    <section class="py-16 bg-blue-500 text-white">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold mb-4">Join Our Newsletter</h2>
+            <p class="max-w-2xl mx-auto mb-8 text-blue-100">Get exclusive deals, new arrivals, and special offers straight to your inbox.</p>
+            
+            <div class="max-w-md mx-auto flex">
+                <input type="email" placeholder="Your email address" class="newsletter-input flex-grow px-4 py-3 rounded-l-full focus:outline-none text-gray-800">
+                <button class="bg-blue-700 hover:bg-blue-800 px-6 py-3 rounded-r-full font-medium transition duration-300">
+                    Subscribe
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact" class="bg-gray-900 text-white pt-16 pb-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i class="fas fa-crown text-blue-400 text-2xl"></i>
+                        <span class="text-xl font-bold">Elite Resell</span>
+                    </div>
+                    <p class="text-gray-400 mb-4">Premium resale products at unbeatable prices.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-pinterest-p"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold text-lg mb-4">Shop</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#airpods-section" class="text-gray-400 hover:text-white">AirPods</a></li>
+                        <li><a href="#colognes-section" class="text-gray-400 hover:text-white">Colognes</a></li>
+                        <li><a href="#nike-section" class="text-gray-400 hover:text-white">Nike Shoes</a></li>
+                        <li><a href="#products" class="text-gray-400 hover:text-white">All Products</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">New Arrivals</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold text-lg mb-4">Help</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">FAQs</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Shipping</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Returns</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Authenticity</a></li>
+                        <li><a href="#contact" class="text-gray-400 hover:text-white">Contact Us</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold text-lg mb-4">Contact</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt mt-1 mr-3 text-blue-400"></i>
+                            <span>123 Resell Street, Miami, FL 33101</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-phone-alt mr-3 text-blue-400"></i>
+                            <span>(737) 349 4416</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope mr-3 text-blue-400"></i>
+                            <span>brenanja.hertenst@huttoisd.org</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 text-sm mb-4 md:mb-0">© 2023 Elite Resell. All rights reserved.</p>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white text-sm">Privacy Policy</a>
+                    <a href="#" class="text-gray-400 hover:text-white text-sm">Terms of Service</a>
+                    <a href="#" class="text-gray-400 hover:text-white text-sm">Sitemap</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Shopping Cart Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const cart = [];
+            const cartOverlay = document.getElementById('cart-overlay');
+            const cartBackdrop = document.getElementById('cart-backdrop');
+            const cartIcon = document.getElementById('cart-icon');
+            const closeCart = document.getElementById('close-cart');
+            const cartItemsContainer = document.getElementById('cart-items');
+            const cartCount = document.getElementById('cart-count');
+            const cartSubtotal = document.getElementById('cart-subtotal');
+            const cartShipping = document.getElementById('cart-shipping');
+            const cartTotal = document.getElementById('cart-total');
+            const checkoutBtn = document.getElementById('checkout-btn');
+            const addToCartButtons = document.querySelectorAll('.add-to-cart');
+            
+            // Toggle cart overlay
+            cartIcon.addEventListener('click', function(e) {
+                e.preventDefault();
+                cartOverlay.classList.add('active');
+                cartBackdrop.classList.add('active');
+            });
+            
+            closeCart.addEventListener('click', function() {
+                cartOverlay.classList.remove('active');
+                cartBackdrop.classList.remove('active');
+            });
+            
+            cartBackdrop.addEventListener('click', function() {
+                cartOverlay.classList.remove('active');
+                cartBackdrop.classList.remove('active');
+            });
+            
+            // Add to cart functionality
+            addToCartButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const productCard = this.closest('.product-card');
+                    const productId = productCard.dataset.id;
+                    const productName = productCard.dataset.name;
+                    const productPrice = parseFloat(productCard.dataset.price);
+                    const productImage = productCard.dataset.image;
+                    
+                    // Check if product already in cart
+                    const existingItem = cart.find(item => item.id === productId);
+                    
+                    if (existingItem) {
+                        existingItem.quantity += 1;
+                    } else {
+                        cart.push({
+                            id: productId,
+                            name: productName,
+                            price: productPrice,
+                            image: productImage,
+                            quantity: 1
+                        });
+                    }
+                    
+                    updateCart();
+                    
+                    // Show cart overlay
+                    cartOverlay.classList.add('active');
+                    cartBackdrop.classList.add('active');
+                    
+                    // Show added to cart animation
+                    const addedMsg = document.createElement('div');
+                    addedMsg.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-bounce';
+                    addedMsg.textContent = 'Added to cart!';
+                    document.body.appendChild(addedMsg);
+                    
+                    setTimeout(() => {
+                        addedMsg.remove();
+                    }, 2000);
+                });
+            });
+            
+            // Update cart display
+            function updateCart() {
+                // Update cart count
+                const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+                cartCount.textContent = totalItems;
+                
+                // Update cart items
+                cartItemsContainer.innerHTML = '';
+                
+                if (cart.length === 0) {
+                    cartItemsContainer.innerHTML = '<p class="text-gray-500 text-center py-8">Your cart is empty</p>';
+                } else {
+                    cart.forEach(item => {
+                        const cartItem = document.createElement('div');
+                        cartItem.className = 'flex items-center py-4 border-b border-gray-200';
+                        cartItem.innerHTML = `
+                            <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden mr-4">
+                                <img src="${item.image}" alt="${item.name}" class="w-full h-full object-contain">
+                            </div>
+                            <div class="flex-grow">
+                                <h4 class="font-medium">${item.name}</h4>
+                                <div class="flex justify-between items-center mt-1">
+                                    <span class="text-gray-500">$${item.price.toFixed(2)} x ${item.quantity}</span>
+                                    <span class="font-medium">$${(item.price * item.quantity).toFixed(2)}</span>
+                                </div>
+                            </div>
+                            <button class="remove-item ml-4 text-gray-400 hover:text-red-500" data-id="${item.id}">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        `;
+                        cartItemsContainer.appendChild(cartItem);
+                    });
+                    
+                    // Add remove item functionality
+                    document.querySelectorAll('.remove-item').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const itemId = this.dataset.id;
+                            const itemIndex = cart.findIndex(item => item.id === itemId);
+                            
+                            if (itemIndex !== -1) {
+                                cart.splice(itemIndex, 1);
+                                updateCart();
+                            }
+                        });
+                    });
+                }
+                
+                // Update totals
+                const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+                const shipping = subtotal > 0 ? 5.00 : 0;
+                const total = subtotal + shipping;
+                
+                cartSubtotal.textContent = `$${subtotal.toFixed(2)}`;
+                cartShipping.textContent = `$${shipping.toFixed(2)}`;
+                cartTotal.textContent = `$${total.toFixed(2)}`;
+            }
+            
+            // Checkout button
+            checkoutBtn.addEventListener('click', function() {
+                if (cart.length === 0) {
+                    alert('Your cart is empty!');
+                    return;
+                }
+                
+                alert('Checkout functionality would be implemented here in a real application!');
+                // In a real app, this would redirect to a checkout page
+            });
+            
+            // Category filter buttons
+            const categoryButtons = document.querySelectorAll('.category-btn');
+            categoryButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    categoryButtons.forEach(btn => {
+                        btn.classList.remove('bg-blue-500', 'text-white');
+                        btn.classList.add('bg-gray-200', 'text-gray-700');
+                    });
+                    this.classList.remove('bg-gray-200', 'text-gray-700');
+                    this.classList.add('bg-blue-500', 'text-white');
+                    // Here you would filter products based on category
+                });
+            });
+            
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    if (this.getAttribute('href') === '#') {
+                        e.preventDefault();
+                        return;
+                    }
+                    
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
